@@ -58,6 +58,7 @@ public class GameManager : MonoBehaviour {
 		origRounds = rounds;
 		uiCanvas.enabled = false;
 		gameCanvas.enabled = false;
+		gameOverCanvas.enabled = false;
 		introCanvas.enabled = true;
 		burnCanvas.enabled = false;
 		jokerCanvas.enabled = false;
@@ -84,11 +85,12 @@ public class GameManager : MonoBehaviour {
 		introplaySound(true);
 		gameplaySound(false);
 
+		uiCanvas.enabled = true;
+		gameCanvas.enabled = false;
+		gameOverCanvas.enabled = false;
+		introCanvas.enabled = false;
 		burnCanvas.enabled = false;
 		jokerCanvas.enabled = false;
-		introCanvas.enabled = false;
-		uiCanvas.enabled = true;
-		gameCanvas.enabled = true;
 	}
 
 	public void gameOver()
@@ -106,17 +108,47 @@ public class GameManager : MonoBehaviour {
 		//playbutton.interactable = true;
 		playbutton.gameObject.SetActive(true);
 
-		gameCanvas.enabled = false;
 		uiCanvas.enabled = false;
-		burnCanvas.enabled = true;
+		gameCanvas.enabled = false;
+		gameOverCanvas.enabled = true;
+		introCanvas.enabled = false;
+		burnCanvas.enabled = false;
+		jokerCanvas.enabled = false;
 
 		if (gameSound != null)
 		{
 			gameSound.Stop();
 		}
 		gameoverSound(true);
+	}
 
+	public void winner()
+	{
+		foreach (GameObject go in gameingredients)
+		{
+			go.SetActive(false);
+		}
 
+		requesttext.text = "";
+		//ordertext.text = "You ruined my rutial!\n\nGAME OVER! Press button to try again.\nBtw, you just died a horrible slow death by the angry villagers";
+		//ordertext.alignment = TextAnchor.UpperCenter;
+		ordertext.text = "";
+		//playbutton.GetComponent<CanvasGroup>().alpha = 1;
+		//playbutton.interactable = true;
+		playbutton.gameObject.SetActive(true);
+
+		uiCanvas.enabled = false;
+		gameCanvas.enabled = false;
+		gameOverCanvas.enabled = false;
+		introCanvas.enabled = false;
+		burnCanvas.enabled = true;
+		jokerCanvas.enabled = false;
+
+		if (gameSound != null)
+		{
+			gameSound.Stop();
+		}
+		gameoverSound(true);
 	}
 
 	private void gameoverSound(bool on)
@@ -196,8 +228,14 @@ public class GameManager : MonoBehaviour {
 		}
 		rounds = origRounds;
 		currentRound = 0;
-		
+
+		uiCanvas.enabled = true;
 		gameCanvas.enabled = true;
+		gameOverCanvas.enabled = false;
+		introCanvas.enabled = false;
+		burnCanvas.enabled = false;
+		jokerCanvas.enabled = false;
+
 		foreach (GameObject go in gameingredients)
 		{
 			go.SetActive(true);
@@ -215,20 +253,13 @@ public class GameManager : MonoBehaviour {
 		if (currentRound > rounds)
 		{
 			// WinnerBurn
-			winnerBurn();
+			winner();
 		}
 		else
 		{
 			Debug.Log("Playing a new round, so adding all the peoples again");
 			roundCustomers = new List<Customer>(customers.ToArray()); // origCustomers;
 		}
-	}
-
-	private void winnerBurn()
-	{
-		Debug.Log("YOU WON BUT ALSO LOST THE GAME.\nTHEY ARE NOW BURNING YOUR BODY BECAUSE YOU'RE DOING WHICHCRAFT!");
-		gameCanvas.enabled = false;
-		burnCanvas.enabled = true;
 	}
 
 	void resetCustomers()
