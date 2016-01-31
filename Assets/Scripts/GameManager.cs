@@ -14,8 +14,8 @@ public class GameManager : MonoBehaviour {
 
 	public Canvas gameCanvas;
 	public Canvas gameOverCanvas;
-	public Canvas BurnCanvas;
-	public Canvas JokerCanvas;
+	public Canvas burnCanvas;
+	public Canvas jokerCanvas;
 
     private List<Ingredient> ingredients;
     private List<Ingredient> requestedOrder;
@@ -33,6 +33,7 @@ public class GameManager : MonoBehaviour {
 	public Ingredient lettuce;
 
 	public int rounds = 5;
+	private int origRounds;
 	private int currentRound = 0;
 
     // Use this for initialization
@@ -45,6 +46,7 @@ public class GameManager : MonoBehaviour {
 
         DontDestroyOnLoad(gameObject);
 
+		origRounds = rounds;
 		gameCanvas.enabled = false;
         //playbutton  = GameObject.Find("NotInGame/PlayButton").GetComponent<Button>();
         //requesttext = GameObject.Find("InGame/Request").GetComponent<Text>();
@@ -78,6 +80,9 @@ public class GameManager : MonoBehaviour {
 
     public void createNewGame()
     {
+		rounds = origRounds;
+		currentRound = 0;
+
 		gameCanvas.enabled = true;
 		Debug.Log("Creating a game");
 		foreach (GameObject go in gameingredients)
@@ -93,10 +98,25 @@ public class GameManager : MonoBehaviour {
 
 	public void playRound()
 	{
-		Debug.Log("Playing a new round, so adding all the peoples again");
-		roundCustomers = new List<Customer>(customers.ToArray()); // origCustomers;
+		currentRound++;
+		if (currentRound > rounds)
+		{
+			// WinnerBurn
+			winnerBurn();
+		}
+		else
+		{
+			Debug.Log("Playing a new round, so adding all the peoples again");
+			roundCustomers = new List<Customer>(customers.ToArray()); // origCustomers;
+		}
 	}
 
+	private void winnerBurn()
+	{
+		Debug.Log("YOU WON BUT ALSO LOST THE GAME.\nTHEY ARE NOW BURNING YOUR BODY BECAUSE YOU'RE DOING WHICHCRAFT!");
+		gameCanvas.enabled = false;
+		burnCanvas.enabled = true;
+	}
 
 	void resetCustomers()
     {
@@ -119,16 +139,18 @@ public class GameManager : MonoBehaviour {
 		{	
 			playRound();
 		}
+		if (roundCustomers.Count > 0)
+		{
+			ordertext.text = "";
+			ordertext.alignment = TextAnchor.UpperLeft;
+			requesttext.text = "";
 
-		ordertext.text = "";
-		ordertext.alignment = TextAnchor.UpperLeft;
-		requesttext.text = "";
-
-		int customerIndex = Random.Range(0, roundCustomers.Count);
-        Customer customer = roundCustomers[customerIndex];
-		roundCustomers.RemoveAt(customerIndex);
-		Debug.Log("Now there are " + roundCustomers.Count + " peoples left");
-        newCustomer(customer);
+			int customerIndex = Random.Range(0, roundCustomers.Count);
+			Customer customer = roundCustomers[customerIndex];
+			roundCustomers.RemoveAt(customerIndex);
+			Debug.Log("Now there are " + roundCustomers.Count + " peoples left");
+			newCustomer(customer);
+		}
     }
 
     public void newCustomer(Customer customer)
