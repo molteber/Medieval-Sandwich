@@ -16,9 +16,18 @@ public class GameManager : MonoBehaviour {
 	public Canvas gameOverCanvas;
 	public Canvas burnCanvas;
 	public Canvas jokerCanvas;
-
+	public Canvas introCanvas;
+	public Canvas uiCanvas;
     private List<Ingredient> ingredients;
     private List<Ingredient> requestedOrder;
+
+	public AudioSource introSound;
+	public AudioSource gameSound;
+	public AudioSource fireSound;
+	public AudioSource fireCrySound;
+	public AudioSource fireAndCrySound;
+
+	private Countdown countdown;
 
 	public List<Customer> customers;
 	private List<Customer> roundCustomers = new List<Customer>();
@@ -47,13 +56,15 @@ public class GameManager : MonoBehaviour {
         DontDestroyOnLoad(gameObject);
 
 		origRounds = rounds;
+		uiCanvas.enabled = false;
 		gameCanvas.enabled = false;
-        //playbutton  = GameObject.Find("NotInGame/PlayButton").GetComponent<Button>();
-        //requesttext = GameObject.Find("InGame/Request").GetComponent<Text>();
-        //ordertext   = GameObject.Find("InGame/Order").GetComponent<Text>();
+		introCanvas.enabled = true;
+		burnCanvas.enabled = false;
+		jokerCanvas.enabled = false;
 
+		countdown = gameCanvas.GetComponent<Countdown>();
 
-        gameingredients = GameObject.FindGameObjectsWithTag("Item");
+		gameingredients = GameObject.FindGameObjectsWithTag("Item");
 
 		foreach (GameObject go in gameingredients)
 		{
@@ -61,9 +72,26 @@ public class GameManager : MonoBehaviour {
 		}
 		playbutton.gameObject.SetActive(true);
 		//createNewGame();
+
+		gameoverSound(false);
+		introplaySound(true);
+		gameplaySound(false);
 	}
 
-	private void gameOver()
+	public void hideIntro()
+	{
+		gameoverSound(false);
+		introplaySound(true);
+		gameplaySound(false);
+
+		burnCanvas.enabled = false;
+		jokerCanvas.enabled = false;
+		introCanvas.enabled = false;
+		uiCanvas.enabled = true;
+		gameCanvas.enabled = true;
+	}
+
+	public void gameOver()
     {
 		foreach (GameObject go in gameingredients)
         {
@@ -71,20 +99,105 @@ public class GameManager : MonoBehaviour {
         }
 
 		requesttext.text = "";
-		ordertext.text = "You ruined my rutial!\n\nGAME OVER! Press button to try again.\nBtw, you just died a horrible slow death by the angry villagers";
-		ordertext.alignment = TextAnchor.UpperCenter;
+		//ordertext.text = "You ruined my rutial!\n\nGAME OVER! Press button to try again.\nBtw, you just died a horrible slow death by the angry villagers";
+		//ordertext.alignment = TextAnchor.UpperCenter;
+		ordertext.text = "";
 		//playbutton.GetComponent<CanvasGroup>().alpha = 1;
 		//playbutton.interactable = true;
 		playbutton.gameObject.SetActive(true);
-    }
+
+		gameCanvas.enabled = false;
+		uiCanvas.enabled = false;
+		burnCanvas.enabled = true;
+
+		if (gameSound != null)
+		{
+			gameSound.Stop();
+		}
+		gameoverSound(true);
+
+
+	}
+
+	private void gameoverSound(bool on)
+	{
+		if (on)
+		{
+			if (fireCrySound != null)
+			{
+				if (!fireCrySound.isPlaying)
+					fireCrySound.Play();
+			}
+			if (fireSound != null)
+			{
+				if (!fireSound.isPlaying)
+					fireSound.Play();
+			}
+		}
+		else
+		{
+			if (fireCrySound != null)
+			{
+				fireCrySound.Stop();
+			}
+			if (fireSound != null)
+			{
+				fireSound.Stop();
+			}
+		}
+	}
+
+	private void gameplaySound(bool on)
+	{
+		if (on)
+		{
+			if (gameSound != null)
+			{
+				if (!gameSound.isPlaying)
+					gameSound.Play();
+			}
+		} else
+		{
+			if (gameSound != null)
+			{
+				gameSound.Stop();
+			}
+		}
+	}
+	
+	private void introplaySound(bool on)
+	{
+		if (on)
+		{
+			if (introSound != null)
+			{
+				if (!introSound.isPlaying)
+					introSound.Play();
+			}
+		} else
+		{
+			if (introSound != null)
+			{
+				introSound.Stop();
+			}
+		}
+	}
 
     public void createNewGame()
     {
+
+		gameoverSound(false);
+		introplaySound(false);
+		gameplaySound(true);
+		countdown.startTimer();
+		if (gameSound != null)
+		{
+			gameSound.Play();
+		}
 		rounds = origRounds;
 		currentRound = 0;
-
+		
 		gameCanvas.enabled = true;
-		Debug.Log("Creating a game");
 		foreach (GameObject go in gameingredients)
 		{
 			go.SetActive(true);
